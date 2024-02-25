@@ -2,7 +2,7 @@ import express from "express";
 
 import mongoose from "mongoose";
 
-// import NodeCache from "node-cache";
+import NodeCache from "node-cache";
 
 const app = express();
 
@@ -31,17 +31,17 @@ const blogSchema = new mongoose.Schema({
 
 const Blog = mongoose.model("Blog", blogSchema);
 
-// const cache = new NodeCache();
+const cache = new NodeCache();
 
 app.get("/getBlogs/:authorId", async (req, res) => {
   try {
-    // const authorId=req.params.authorId;
-    // const cachedData=cache.get(authorId);
+    const authorId=req.params.authorId;
+    const cachedData=cache.get(authorId);
 
-    // if (cachedData) {
-    // console.log('Retriving data from cache itself');
-    // return res.json(cachedData)
-    // }
+    if (cachedData) {
+    console.log('Retriving data from cache itself');
+    return res.json(cachedData)
+    }
 
     const aggregationPipeline = [
       {
@@ -73,7 +73,7 @@ app.get("/getBlogs/:authorId", async (req, res) => {
       },
     ];
     const aggregateData = await Blog.aggregate(aggregationPipeline).exec();
-    // cache.set(authorId, aggregateData, 60);
+    cache.set(authorId, aggregateData, 60);
     console.log(aggregateData);
     res.json(aggregateData);
   } catch (error) {
